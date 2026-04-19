@@ -5,24 +5,47 @@ pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-- group: my-keyvault-group   # link this in Azure DevOps
+- group: my-keyvault-group   # optional (only if you need variables here)
 
 steps:
+
+# Install Node.js
 - task: NodeTool@0
   inputs:
     versionSpec: '16.x'
+  displayName: Install Node.js
 
+# Install dependencies
 - script: npm install
   displayName: Install dependencies
 
+# (Optional) Run your app (for testing)
 - script: node app.js
   displayName: Run App
   env:
-    MY_SECRET: $(MY-SECRET)
+    MY_SECRET: $(MY_SECRET)
 
-# Optional Deployment
-- task: AzureWebApp@1
+# Copy files to staging folder
+- task: CopyFiles@2
   inputs:
-    azureSubscription: 'your-service-connection'
-    appName: 'your-app-name'
-    package: '.'
+    Contents: '**'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)'
+  displayName: Copy files
+
+# Archive into zip (VERY IMPORTANT for release)
+- task: ArchiveFiles@2
+  inputs:
+    rootFolderOrFile: '$(Build.ArtifactStagingDirectory)'
+    includeRootFolder: false
+    archiveType: 'zip'
+    archiveFile: '$(Build.ArtifactStagingDirectory)/app.zip'
+    replaceExistingArchive: true
+  displayName: Create ZIP
+
+# Publish artifact
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
+  displayName: Publish Artifact
