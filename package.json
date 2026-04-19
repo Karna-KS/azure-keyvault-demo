@@ -1,0 +1,12 @@
+{
+  "name": "azure-keyvault-demo",
+  "version": "1.0.0",
+  "description": "Demo for Azure Key Vault with DevOps",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}

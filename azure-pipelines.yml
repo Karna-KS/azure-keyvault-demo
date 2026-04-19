@@ -1,0 +1,28 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+- group: my-keyvault-group   # link this in Azure DevOps
+
+steps:
+- task: NodeTool@0
+  inputs:
+    versionSpec: '16.x'
+
+- script: npm install
+  displayName: Install dependencies
+
+- script: node app.js
+  displayName: Run App
+  env:
+    MY_SECRET: $(MY-SECRET)
+
+# Optional Deployment
+- task: AzureWebApp@1
+  inputs:
+    azureSubscription: 'your-service-connection'
+    appName: 'your-app-name'
+    package: '.'
